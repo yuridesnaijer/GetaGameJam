@@ -5,34 +5,83 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
 
-    public GameObject Cell;
-    public Camera mainCamera;
-    private List<Vector3> gridPositions = new List<Vector3>();
-    // Start is called before the first frame update
+    #region Singleton
+    public static GridManager instance;
+
+    /// <summary>
+    /// Awake is called when the script instance is being loaded.
+    /// </summary>
+    void Awake()
+    {
+        instance = this;
+    }
+    #endregion
+
+    public GameObject Grid;
+    private GameObject CurrentGrid;
+    private float AnimationTimer = 0f;
+    private List<GameObject> ActivatedCells = new List<GameObject>();
+    private Color CurrentCollor;
+
+    /// <summary>
+    /// Start is called on the frame when a script is enabled just before
+    /// any of the Update methods is called the first time.
+    /// </summary>
     void Start()
     {
-        GenerateGrid(5);
+        CurrentGrid = Instantiate(Grid, new Vector3(), new Quaternion());
+
     }
 
-    private void GenerateGrid(int length)
+    public void NextLevel()
     {
-        gridPositions.Clear();
-        for (int x = 0; x < length; x++)
+        GameObject newGrid = Instantiate(Grid, new Vector3(), new Quaternion());
+        foreach (MeshRenderer mr in newGrid.GetComponentsInChildren<MeshRenderer>())
         {
-            for (int z = 0; z < length; z++)
-            {
-                gridPositions.Add(new Vector3(x, 0, z));
-            }
+            mr.material.SetColor("_Color", CurrentCollor);
         }
+        CurrentCollor = Random.ColorHSV();
 
-        foreach (Vector3 position in gridPositions)
+        newGrid.transform.localScale = new Vector3(5f, 5f, 5f);
+
+        ActivatedCells.Clear();
+        Destroy(CurrentGrid);
+        StartCoroutine(ScaleDownAnimation(3f, newGrid));
+    }
+
+    IEnumerator ScaleDownAnimation(float time, GameObject grid)
+    {
+
+        CurrentGrid = grid;
+
+        float i = 0;
+        float rate = 1 / time;
+        Vector3 fromScale = grid.transform.localScale;
+        Vector3 toScale = Vector3.one;
+        while (i < 1)
         {
-            Instantiate(Cell, position, new Quaternion(), this.transform);
+            i += Time.deltaTime * rate;
+            grid.transform.localScale = Vector3.Lerp(fromScale, toScale, i);
+            yield return 0;
         }
     }
 
-    public void NextLevelAnimation()
+    public void ActivateCell(GameObject cell)
     {
-        this.transform.localScale = new Vector3(.1f, .1f, .1f);
+        if (ActivatedCells.Find((x) => x.transform == cell.transform) == null)
+        {
+            ActivatedCells.Add(cell);
+            MeshRenderer mr = cell.GetComponent<MeshRenderer>();
+            mr.material.SetColor("_Color", CurrentCollor);
+        }
+        else
+        {
+            Debug.Log("Cell already activated");
+        }
+
+        if (ActivatedCells.Count == 25) // TODO: Get total cell count dynamically
+        {
+            NextLevel();
+        }
     }
 }
