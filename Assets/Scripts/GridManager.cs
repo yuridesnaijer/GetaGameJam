@@ -19,9 +19,8 @@ public class GridManager : MonoBehaviour
 
     public GameObject Grid;
     private GameObject CurrentGrid;
-    private float AnimationTimer = 0f;
     private List<GameObject> ActivatedCells = new List<GameObject>();
-    private Color CurrentCollor;
+    private Color CurrentCollor = Random.ColorHSV();
 
     /// <summary>
     /// Start is called on the frame when a script is enabled just before
@@ -30,19 +29,20 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         CurrentGrid = Instantiate(Grid, new Vector3(), new Quaternion());
-
     }
 
     public void NextLevel()
     {
         GameObject newGrid = Instantiate(Grid, new Vector3(), new Quaternion());
+
         foreach (MeshRenderer mr in newGrid.GetComponentsInChildren<MeshRenderer>())
         {
             mr.material.SetColor("_Color", CurrentCollor);
         }
         CurrentCollor = Random.ColorHSV();
 
-        newGrid.transform.localScale = new Vector3(5f, 5f, 5f);
+        float size = Mathf.Sqrt(CurrentGrid.transform.childCount);
+        newGrid.transform.localScale = new Vector3(size, size, size);
 
         ActivatedCells.Clear();
         Destroy(CurrentGrid);
@@ -79,7 +79,7 @@ public class GridManager : MonoBehaviour
             Debug.Log("Cell already activated");
         }
 
-        if (ActivatedCells.Count == 25) // TODO: Get total cell count dynamically
+        if (ActivatedCells.Count == CurrentGrid.transform.childCount)
         {
             NextLevel();
         }
