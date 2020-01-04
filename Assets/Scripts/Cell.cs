@@ -10,6 +10,7 @@ public class Cell : MonoBehaviour
     /// </summary>
     void OnMouseUpAsButton()
     {
-        // GridManager.instance.ActivateCell(this.gameObject);
+        GridManager.instance.ActivateCell(this.gameObject);
+        this.GetComponent<Animator>().SetTrigger("Hit");
     }
 }
