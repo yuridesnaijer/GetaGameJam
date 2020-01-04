@@ -11,5 +11,6 @@ public class Cell : MonoBehaviour
     void OnMouseUpAsButton()
     {
         GridManager.instance.ActivateCell(this.gameObject);
+        this.GetComponent<Animator>().SetTrigger("Hit");
     }
 }

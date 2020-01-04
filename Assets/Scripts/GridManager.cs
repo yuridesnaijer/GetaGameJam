@@ -20,7 +20,7 @@ public class GridManager : MonoBehaviour
     public GameObject Grid;
     private GameObject CurrentGrid;
     private List<GameObject> ActivatedCells = new List<GameObject>();
-    private Color CurrentCollor = Random.ColorHSV();
+    private Color CurrentColor;
 
     /// <summary>
     /// Start is called on the frame when a script is enabled just before
@@ -28,6 +28,7 @@ public class GridManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        CurrentColor = Random.ColorHSV();
         CurrentGrid = Instantiate(Grid, new Vector3(), new Quaternion());
     }
 
@@ -37,15 +38,16 @@ public class GridManager : MonoBehaviour
 
         foreach (MeshRenderer mr in newGrid.GetComponentsInChildren<MeshRenderer>())
         {
-            mr.material.SetColor("_Color", CurrentCollor);
+            mr.material.SetColor("_Color", CurrentColor);
         }
-        CurrentCollor = Random.ColorHSV();
+        CurrentColor = Random.ColorHSV();
 
         float size = Mathf.Sqrt(CurrentGrid.transform.childCount);
-        newGrid.transform.localScale = new Vector3(size, size, size);
+        newGrid.transform.localScale = new Vector3(size, 1f, size);
 
         ActivatedCells.Clear();
         Destroy(CurrentGrid);
+
         StartCoroutine(ScaleDownAnimation(3f, newGrid));
     }
 
@@ -53,6 +55,8 @@ public class GridManager : MonoBehaviour
     {
 
         CurrentGrid = grid;
+        yield return new WaitForSeconds(5);
+
 
         float i = 0;
         float rate = 1 / time;
@@ -72,7 +76,7 @@ public class GridManager : MonoBehaviour
         {
             ActivatedCells.Add(cell);
             MeshRenderer mr = cell.GetComponent<MeshRenderer>();
-            mr.material.SetColor("_Color", CurrentCollor);
+            mr.material.SetColor("_Color", CurrentColor);
         }
         else
         {
